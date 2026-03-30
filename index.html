@@ -1,0 +1,124 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Advanced Task Manager</title>
+
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+      tailwind.config = { darkMode: "class" };
+    </script>
+  </head>
+
+  <body
+    class="bg-gray-200 dark:bg-gray-900 text-black dark:text-white transition"
+  >
+    <div
+      id="toast"
+      class="fixed top-5 right-5 bg-black text-white px-4 py-2 rounded shadow hidden z-50 text-sm"
+    ></div>
+
+    <div class="flex min-h-screen">
+      <aside
+        class="bg-blue-900 w-20 sm:w-64 p-3 sm:p-6 text-white flex flex-col items-center sm:items-start rounded-tr-[20px]"
+      >
+        <h1 class="text-lg sm:text-xl mb-6 font-bold">
+          D<span class="text-[#CCAC00]">a</span>ily T<span
+            class="text-[#CCAC00]"
+            >a</span
+          >sks
+        </h1>
+
+        <ul class="space-y-3 text-xs sm:text-sm w-full">
+          <li
+            onclick="setView('pending')"
+            id="pendingTab"
+            class="px-2 sm:px-4 py-2 rounded-md bg-blue-700 cursor-pointer text-center sm:text-left"
+          >
+            Tasks
+          </li>
+
+          <li
+            onclick="setView('completed')"
+            id="completedTab"
+            class="px-2 sm:px-4 py-2 rounded-md hover:bg-blue-700 cursor-pointer text-center sm:text-left"
+          >
+            Done
+          </li>
+        </ul>
+      </aside>
+
+      <main class="flex-1 p-3 sm:p-6">
+        <header class="flex items-center justify-between gap-2 mb-6">
+          <h2 id="sectionTitle" class="text-lg sm:text-2xl font-bold flex-1">
+            Current Tasks
+          </h2>
+
+          <button
+            onclick="toggleDark()"
+            class="flex items-center justify-center w-10 h-10 rounded-full hover:bg-gray-300 dark:hover:bg-gray-700"
+          >
+            🌙
+          </button>
+
+          <input
+            id="search"
+            placeholder="Search..."
+            class="w-[110px] sm:w-[200px] px-2 py-1 rounded border text-xs sm:text-sm dark:bg-gray-800 dark:text-white"
+          />
+        </header>
+
+        <section
+          class="bg-white dark:bg-gray-800 p-3 sm:p-4 rounded shadow mb-6 text-sm"
+        >
+          <div id="taskList"></div>
+          <p id="emptyMsg" class="text-xs text-gray-500 hidden">
+            No tasks found
+          </p>
+        </section>
+
+        <section
+          class="bg-white dark:bg-gray-800 p-3 sm:p-4 rounded shadow text-sm"
+        >
+          <form id="taskForm" class="flex flex-col gap-2 sm:gap-3">
+            <input
+              id="taskInput"
+              placeholder="Task name"
+              class="border px-2 py-2 rounded dark:bg-gray-700 dark:text-white"
+            />
+
+            <textarea
+              id="taskDetails"
+              placeholder="Details"
+              class="border px-2 py-2 rounded dark:bg-gray-700 dark:text-white"
+            ></textarea>
+
+            <input
+              type="datetime-local"
+              id="dueDate"
+              class="border px-2 py-2 rounded dark:bg-gray-700 dark:text-white"
+            />
+
+            <select
+              id="priority"
+              class="border px-2 py-2 rounded dark:bg-gray-700 dark:text-white"
+            >
+              <option value="low">Low</option>
+              <option value="medium">Medium</option>
+              <option value="high">High</option>
+            </select>
+
+            <button class="bg-blue-500 text-white py-2 rounded">
+              Add Task
+            </button>
+          </form>
+        </section>
+      </main>
+    </div>
+
+    <script src="index.js">
+      
+    </script>
+  </body>
+</html>
