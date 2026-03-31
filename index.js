@@ -1,6 +1,26 @@
 document.addEventListener("DOMContentLoaded", () => {
-  let tasks = JSON.parse(localStorage.getItem("tasks")) || [];
-  let currentView = "pending";
+  function parseTasksFromStorage() {
+    try {
+      const data = JSON.parse(localStorage.getItem("tasks"));
+      if (!Array.isArray(data)) return [];
+      return data.map((task) => ({
+        id: task.id || `${Date.now()}-${Math.random()}`,
+        name: task.name || "",
+        details: task.details || "",
+        date: task.date || "",
+        priority: task.priority || "low",
+        completed:
+          task.completed === true || task.completed === "true" ? true : false,
+      }));
+    } catch (err) {
+      console.warn("Invalid tasks in localStorage, resetting:", err);
+      localStorage.removeItem("tasks");
+      return [];
+    }
+  }
+
+  let tasks = parseTasksFromStorage();
+  let currentView = localStorage.getItem("view") || "pending";
   let reminderTimers = {}; // ✅ FIXED
 
   // Ask notification permission
@@ -79,14 +99,18 @@ document.addEventListener("DOMContentLoaded", () => {
       title.textContent = "Completed Tasks";
     }
 
-    const searchVal = search.value.toLowerCase();
+    const searchVal = (search.value || "").toLowerCase();
 
-    filtered = filtered.filter(
-      (t) =>
-        t.name.toLowerCase().includes(searchVal) ||
-        (t.details && t.details.toLowerCase().includes(searchVal)) ||
-        t.priority.toLowerCase().includes(searchVal),
-    );
+    filtered = filtered.filter((t) => {
+      const name = (t.name || "").toLowerCase();
+      const detailsVal = (t.details || "").toLowerCase();
+      const priorityVal = (t.priority || "").toLowerCase();
+      return (
+        name.includes(searchVal) ||
+        detailsVal.includes(searchVal) ||
+        priorityVal.includes(searchVal)
+      );
+    });
 
     taskList.innerHTML = "";
 
@@ -98,7 +122,7 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     filtered.forEach((task) => {
-      const index = tasks.findIndex((t) => t === task); // ✅ FIXED
+      const index = tasks.findIndex((t) => t.id === task.id);
 
       checkDueDates(task);
 
@@ -112,7 +136,7 @@ document.addEventListener("DOMContentLoaded", () => {
           <input type="checkbox" ${task.completed ? "checked" : ""}
             onchange="toggleComplete(${index})"/>
           <span class="${task.completed ? "line-through opacity-50" : ""}">
-            ${task.name}
+            ${task.name || "(No name)"}
           </span>
         </div>
 
@@ -137,10 +161,11 @@ document.addEventListener("DOMContentLoaded", () => {
     if (input.value.trim() === "") return;
 
     const newTask = {
+      id: `${Date.now()}-${Math.random()}`,
       name: input.value,
       details: details.value,
       date: dueDate.value,
-      priority: priority.value,
+      priority: priority.value || "low",
       completed: false,
     };
 
@@ -177,7 +202,6 @@ document.addEventListener("DOMContentLoaded", () => {
     save();
   };
 
-  // Edit task
   window.editTask = function (i) {
     const newName = prompt("Edit task:", tasks[i].name);
     if (newName) {
@@ -187,9 +211,9 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   };
 
-  // Switch view
   window.setView = function (view) {
     currentView = view;
+    localStorage.setItem("view", view);
 
     document.getElementById("pendingTab").classList.remove("bg-blue-700");
     document.getElementById("completedTab").classList.remove("bg-blue-700");
@@ -207,10 +231,8 @@ document.addEventListener("DOMContentLoaded", () => {
     renderTasks();
   }
 
-  // Search
   search.addEventListener("input", renderTasks);
 
-  // Dark mode
   if (localStorage.getItem("dark") === "true") {
     document.documentElement.classList.add("dark");
   }
