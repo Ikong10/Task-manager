@@ -1,9 +1,29 @@
 document.addEventListener("DOMContentLoaded", () => {
-  let tasks = JSON.parse(localStorage.getItem("tasks")) || [];
-  let currentView = "pending";
-  let reminderTimers = {}; // ✅ FIXED
+  function parseTasksFromStorage() {
+    try {
+      const data = JSON.parse(localStorage.getItem("tasks"));
+      if (!Array.isArray(data)) return [];
+      return data.map((task) => ({
+        id: task.id || `${Date.now()}-${Math.random()}`,
+        name: task.name || "",
+        details: task.details || "",
+        date: task.date || "",
+        priority: task.priority || "low",
+        completed:
+          task.completed === true || task.completed === "true" ? true : false,
+      }));
+    } catch (err) {
+      console.warn("Invalid tasks in localStorage, resetting:", err);
+      localStorage.removeItem("tasks");
+      return [];
+    }
+  }
 
-  // Ask notification permission
+  let tasks = parseTasksFromStorage();
+  let currentView = localStorage.getItem("view") || "pending";
+  let reminderTimers = {};
+
+  
   if ("Notification" in window) {
     Notification.requestPermission();
   }
@@ -33,7 +53,7 @@ document.addEventListener("DOMContentLoaded", () => {
     setTimeout(() => toast.classList.add("hidden"), 2000);
   }
 
-  // Schedule reminder
+  
   function scheduleReminder(task, index) {
     if (!task.date) return;
 
@@ -54,7 +74,7 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   }
 
-  // Check due dates
+  
   function checkDueDates(task) {
     if (!task.date) return;
 
@@ -79,14 +99,18 @@ document.addEventListener("DOMContentLoaded", () => {
       title.textContent = "Completed Tasks";
     }
 
-    const searchVal = search.value.toLowerCase();
+    const searchVal = (search.value || "").toLowerCase();
 
-    filtered = filtered.filter(
-      (t) =>
-        t.name.toLowerCase().includes(searchVal) ||
-        (t.details && t.details.toLowerCase().includes(searchVal)) ||
-        t.priority.toLowerCase().includes(searchVal),
-    );
+    filtered = filtered.filter((t) => {
+      const name = (t.name || "").toLowerCase();
+      const detailsVal = (t.details || "").toLowerCase();
+      const priorityVal = (t.priority || "").toLowerCase();
+      return (
+        name.includes(searchVal) ||
+        detailsVal.includes(searchVal) ||
+        priorityVal.includes(searchVal)
+      );
+    });
 
     taskList.innerHTML = "";
 
@@ -98,31 +122,31 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     filtered.forEach((task) => {
-      const index = tasks.findIndex((t) => t === task); // ✅ FIXED
+      const index = tasks.findIndex((t) => t.id === task.id);
 
       checkDueDates(task);
 
       const div = document.createElement("div");
       div.className =
-        "border-b py-2 flex justify-between items-start text-xs sm:text-sm gap-2";
+        "border-b py-4 flex flex-col md:flex-row justify-between items-start md:items-center text-base sm:text-lg gap-4";
 
       div.innerHTML = `
-      <div>
-        <div class="flex items-center gap-2">
+      <div class="flex flex-col gap-2 w-full">
+        <div class="flex items-center gap-4">
           <input type="checkbox" ${task.completed ? "checked" : ""}
-            onchange="toggleComplete(${index})"/>
-          <span class="${task.completed ? "line-through opacity-50" : ""}">
-            ${task.name}
+            onchange="toggleComplete(${index})" class="w-6 h-6" />
+          <span class="${task.completed ? "line-through opacity-70" : ""} text-lg font-semibold">
+            ${task.name || "(No name)"}
           </span>
         </div>
 
-        <p class="text-gray-500">${task.details || ""}</p>
-        <p class="text-xs">📅 ${task.date || "No date"} | 🔥 ${task.priority}</p>
+        <p class="text-gray-500 text-base">${task.details || ""}</p>
+        <p class="text-sm text-gray-400">📅 ${task.date || "No date"} | 🔥 ${task.priority}</p>
       </div>
 
-      <div class="flex gap-2 shrink-0">
-        <button onclick="editTask(${index})">✏️</button>
-        <button onclick="deleteTask(${index})">❌</button>
+      <div class="flex gap-3 shrink-0">
+        <button onclick="editTask(${index})" class="px-3 py-2 rounded bg-yellow-500 text-base hover:bg-yellow-600">✏️ Edit</button>
+        <button onclick="deleteTask(${index})" class="px-3 py-2 rounded bg-red-500 text-base hover:bg-red-600">❌ Delete</button>
       </div>
     `;
 
@@ -130,17 +154,17 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   }
 
-  // Add task
   form.addEventListener("submit", (e) => {
     e.preventDefault();
 
     if (input.value.trim() === "") return;
 
     const newTask = {
+      id: `${Date.now()}-${Math.random()}`,
       name: input.value,
       details: details.value,
       date: dueDate.value,
-      priority: priority.value,
+      priority: priority.value || "low",
       completed: false,
     };
 
@@ -150,14 +174,14 @@ document.addEventListener("DOMContentLoaded", () => {
     scheduleReminder(newTask, tasks.length - 1);
 
     save();
-    form.reset(); // ✅ FIXED
+    form.reset(); 
   });
 
-  // Toggle complete
+  
   window.toggleComplete = function (i) {
     tasks[i].completed = !tasks[i].completed;
 
-    // ❗ stop reminder if completed
+    
     if (tasks[i].completed && reminderTimers[i]) {
       clearTimeout(reminderTimers[i]);
     }
@@ -166,7 +190,7 @@ document.addEventListener("DOMContentLoaded", () => {
     save();
   };
 
-  // Delete task
+  
   window.deleteTask = function (i) {
     if (reminderTimers[i]) {
       clearTimeout(reminderTimers[i]);
@@ -177,7 +201,6 @@ document.addEventListener("DOMContentLoaded", () => {
     save();
   };
 
-  // Edit task
   window.editTask = function (i) {
     const newName = prompt("Edit task:", tasks[i].name);
     if (newName) {
@@ -187,9 +210,9 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   };
 
-  // Switch view
   window.setView = function (view) {
     currentView = view;
+    localStorage.setItem("view", view);
 
     document.getElementById("pendingTab").classList.remove("bg-blue-700");
     document.getElementById("completedTab").classList.remove("bg-blue-700");
@@ -201,16 +224,13 @@ document.addEventListener("DOMContentLoaded", () => {
     renderTasks();
   };
 
-  // Save
   function save() {
     localStorage.setItem("tasks", JSON.stringify(tasks));
     renderTasks();
   }
 
-  // Search
   search.addEventListener("input", renderTasks);
 
-  // Dark mode
   if (localStorage.getItem("dark") === "true") {
     document.documentElement.classList.add("dark");
   }
@@ -223,6 +243,5 @@ document.addEventListener("DOMContentLoaded", () => {
     );
   };
 
-  // Initial render
   renderTasks();
 });

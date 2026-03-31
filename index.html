@@ -3,7 +3,7 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Advanced Task Manager</title>
+    <title>Task Manager</title>
 
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
@@ -12,7 +12,7 @@
   </head>
 
   <body
-    class="bg-gray-200 dark:bg-gray-900 text-black dark:text-white transition"
+    class="bg-gray-200 dark:bg-gray-900 text-black dark:text-white transition text-xl sm:text-2xl"
   >
     <div
       id="toast"
@@ -21,7 +21,7 @@
 
     <div class="flex min-h-screen">
       <aside
-        class="bg-blue-900 w-20 sm:w-64 p-3 sm:p-6 text-white flex flex-col items-center sm:items-start rounded-tr-[20px]"
+        class="bg-blue-900 w-20 sm:w-64 p-3 sm:p-6 text-white flex flex-col items-center sm:items-start rounded-tr-[40px]"
       >
         <h1 class="text-lg sm:text-xl mb-6 font-bold">
           D<span class="text-[#CCAC00]">a</span>ily T<span
@@ -50,27 +50,36 @@
       </aside>
 
       <main class="flex-1 p-3 sm:p-6">
-        <header class="flex items-center justify-between gap-2 mb-6">
-          <h2 id="sectionTitle" class="text-lg sm:text-2xl font-bold flex-1">
+        <header
+          class="flex flex-col sm:flex-row items-center justify-between gap-2 mb-6"
+        >
+          <h2
+            id="sectionTitle"
+            class="text-2xl sm:text-4xl font-bold text-center sm:text-left w-full sm:w-auto"
+          >
             Current Tasks
           </h2>
 
-          <button
-            onclick="toggleDark()"
-            class="flex items-center justify-center w-10 h-10 rounded-full hover:bg-gray-300 dark:hover:bg-gray-700"
-          >
-            🌙
-          </button>
+          <div class="flex items-center gap-2">
+            <button
+              onclick="toggleDark()"
+              class="flex items-center justify-center w-10 h-10 rounded-full hover:bg-gray-300 dark:hover:bg-gray-700"
+              aria-label="Toggle dark mode"
+            >
+              🌙
+            </button>
 
-          <input
-            id="search"
-            placeholder="Search..."
-            class="w-[110px] sm:w-[200px] px-2 py-1 rounded border text-xs sm:text-sm dark:bg-gray-800 dark:text-white"
-          />
+            <input
+              id="search"
+              placeholder="Search..."
+              class="w-[140px] sm:w-[220px] px-4 py-3 rounded border text-base sm:text-lg dark:bg-gray-800 dark:text-white"
+              aria-label="Search tasks"
+            />
+          </div>
         </header>
 
         <section
-          class="bg-white dark:bg-gray-800 p-3 sm:p-4 rounded shadow mb-6 text-sm"
+          class="bg-white dark:bg-gray-800 p-4 sm:p-6 rounded shadow mb-8 text-base sm:text-lg"
         >
           <div id="taskList"></div>
           <p id="emptyMsg" class="text-xs text-gray-500 hidden">
@@ -79,37 +88,40 @@
         </section>
 
         <section
-          class="bg-white dark:bg-gray-800 p-3 sm:p-4 rounded shadow text-sm"
+          class="bg-white dark:bg-gray-800 p-4 sm:p-6 rounded shadow text-base sm:text-lg max-w-xl mx-auto"
         >
-          <form id="taskForm" class="flex flex-col gap-2 sm:gap-3">
+          <form id="taskForm" class="flex flex-col gap-3 sm:gap-4">
             <input
               id="taskInput"
               placeholder="Task name"
-              class="border px-2 py-2 rounded dark:bg-gray-700 dark:text-white"
+              class="border px-3 py-3 rounded dark:bg-gray-700 dark:text-white text-base sm:text-lg"
             />
 
             <textarea
               id="taskDetails"
               placeholder="Details"
-              class="border px-2 py-2 rounded dark:bg-gray-700 dark:text-white"
+              class="border px-3 py-3 rounded dark:bg-gray-700 dark:text-white text-base sm:text-lg"
             ></textarea>
 
             <input
               type="datetime-local"
               id="dueDate"
-              class="border px-2 py-2 rounded dark:bg-gray-700 dark:text-white"
+              class="border px-3 py-3 rounded dark:bg-gray-700 dark:text-white text-base sm:text-lg"
             />
 
             <select
               id="priority"
-              class="border px-2 py-2 rounded dark:bg-gray-700 dark:text-white"
+              class="border px-3 py-3 rounded dark:bg-gray-700 dark:text-white text-base sm:text-lg"
             >
               <option value="low">Low</option>
               <option value="medium">Medium</option>
               <option value="high">High</option>
             </select>
 
-            <button class="bg-blue-500 text-white py-2 rounded">
+            <button
+              type="submit"
+              class="bg-blue-500 text-white py-3 rounded-[8px] w-[90px] mx-auto text-lg font-semibold hover:bg-blue-600 transition"
+            >
               Add Task
             </button>
           </form>
@@ -117,8 +129,6 @@
       </main>
     </div>
 
-    <script src="index.js">
-      
-    </script>
+    <script src="index.js"></script>
   </body>
 </html>
